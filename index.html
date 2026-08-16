@@ -11,6 +11,7 @@
     <h1>🌳 Family Tree</h1>
     <div class="header-actions">
       <span id="status" class="status"></span>
+      <button id="tokenBtn" class="btn btn-secondary hidden">🔑 GitHub Token</button>
     </div>
   </header>
 
@@ -63,6 +64,26 @@
       <p id="formHint" class="hint"></p>
     </section>
   </main>
+
+  <!-- GitHub token modal (only needed when there's no local server, e.g. on the public site) -->
+  <div id="tokenModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>GitHub Token</h2>
+      <p class="hint">
+        The public site has no server, so saving here needs a
+        <strong>fine-grained personal access token</strong> scoped to this
+        repo only (Contents: Read and write). It's stored only in your own
+        browser's local storage and sent directly to <code>api.github.com</code>
+        over HTTPS — never anywhere else.
+      </p>
+      <label for="ghToken">Personal Access Token</label>
+      <input type="password" id="ghToken" placeholder="github_pat_..." />
+      <div class="modal-actions">
+        <button id="tokenSave" class="btn btn-primary">Save</button>
+        <button id="tokenCancel" class="btn btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>

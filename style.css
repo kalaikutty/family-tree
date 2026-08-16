@@ -194,3 +194,25 @@ main {
 .btn-primary:hover { background: var(--primary-dark); }
 .btn-secondary { background: #eef1ee; color: var(--text); }
 .btn-secondary:hover { background: #e0e6e0; }
+
+/* ---- modal ---- */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+.modal.hidden { display: none; }
+.modal-content {
+  background: #fff;
+  border-radius: 10px;
+  padding: 22px;
+  width: 420px;
+  max-width: 92vw;
+}
+.modal-content h2 { margin-top: 0; }
+.modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+.modal-actions .btn { flex: 1; }

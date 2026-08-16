@@ -6,6 +6,11 @@ let selectedId = null;
 
 const DATA_FILE = "data.json";
 const LS_KEY_TREE = "familyTree.cachedData";
+const LS_KEY_TOKEN = "familyTree.githubToken";
+const GITHUB_OWNER = "kalaikutty";
+const GITHUB_REPO = "family-tree";
+const GITHUB_BRANCH = "main";
+const IS_LOCAL = location.hostname === "localhost" || location.hostname === "127.0.0.1";
 
 // ---------- Elements ----------
 const treeContainer = document.getElementById("treeContainer");
@@ -22,6 +27,25 @@ const parentsWrap = document.getElementById("parentsWrap");
 const parent1Select = document.getElementById("parent1");
 const parent2Select = document.getElementById("parent2");
 const formHint = document.getElementById("formHint");
+const tokenBtn = document.getElementById("tokenBtn");
+const tokenModal = document.getElementById("tokenModal");
+const tokenSave = document.getElementById("tokenSave");
+const tokenCancel = document.getElementById("tokenCancel");
+const ghToken = document.getElementById("ghToken");
+
+tokenBtn.classList.toggle("hidden", IS_LOCAL);
+tokenBtn.addEventListener("click", () => {
+  ghToken.value = "";
+  tokenModal.classList.remove("hidden");
+});
+tokenCancel.addEventListener("click", () => tokenModal.classList.add("hidden"));
+tokenSave.addEventListener("click", () => {
+  const value = ghToken.value.trim();
+  if (value) localStorage.setItem(LS_KEY_TOKEN, value);
+  else localStorage.removeItem(LS_KEY_TOKEN);
+  tokenModal.classList.add("hidden");
+  setStatus("Token saved.", false);
+});
 
 // ---------- Init ----------
 init();
@@ -321,24 +345,78 @@ addForm.addEventListener("submit", async (e) => {
   await saveTree();
 });
 
-// ---------- Persistence (via local server, no tokens needed) ----------
+// ---------- Persistence ----------
+// On localhost: local server (no token). On the public site: direct GitHub
+// Contents API call using a token you enter once via 🔑 GitHub Token.
 async function saveTree() {
   setStatus("Saving…", false);
   try {
-    const res = await fetch("/api/save", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(people, null, 2),
-    });
-    const json = await res.json().catch(() => ({}));
-    if (!res.ok || !json.ok) {
-      throw new Error(json.error || `HTTP ${res.status}`);
+    if (IS_LOCAL) {
+      await saveViaLocalServer();
+    } else {
+      await saveViaGitHubApi();
     }
     setStatus("Saved ✓", false);
   } catch (err) {
     console.error(err);
     setStatus(`Save failed: ${err.message} (kept locally in this browser only)`, true);
   }
+}
+
+async function saveViaLocalServer() {
+  const res = await fetch("/api/save", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(people, null, 2),
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok || !json.ok) {
+    throw new Error(json.error || `HTTP ${res.status}`);
+  }
+}
+
+async function saveViaGitHubApi() {
+  const token = localStorage.getItem(LS_KEY_TOKEN);
+  if (!token) {
+    tokenModal.classList.remove("hidden");
+    throw new Error("No GitHub token configured yet — click \uD83D\uDD11 GitHub Token and save one");
+  }
+
+  const apiBase = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${DATA_FILE}`;
+  const headers = { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" };
+
+  let sha;
+  const getRes = await fetch(`${apiBase}?ref=${GITHUB_BRANCH}`, { headers });
+  if (getRes.ok) {
+    sha = (await getRes.json()).sha;
+  } else if (getRes.status !== 404) {
+    throw new Error(`Failed to read current file (HTTP ${getRes.status})`);
+  }
+
+  const content = base64EncodeUnicode(JSON.stringify(people, null, 2) + "\n");
+  const putRes = await fetch(apiBase, {
+    method: "PUT",
+    headers: { ...headers, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      message: "Update family tree",
+      content,
+      branch: GITHUB_BRANCH,
+      ...(sha ? { sha } : {}),
+    }),
+  });
+
+  if (!putRes.ok) {
+    const errJson = await putRes.json().catch(() => ({}));
+    if (putRes.status === 401) localStorage.removeItem(LS_KEY_TOKEN);
+    throw new Error(errJson.message || `HTTP ${putRes.status}`);
+  }
+}
+
+function base64EncodeUnicode(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binary = "";
+  bytes.forEach((b) => (binary += String.fromCharCode(b)));
+  return btoa(binary);
 }
 
 function setStatus(msg, isError) {
