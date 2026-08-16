@@ -181,15 +181,21 @@ async function deleteNode(id) {
 }
 
 function populateRelationSelects() {
-  const optionsHtml = people.map((p) => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join("");
+  const optionsHtml = people.map((p) => `<option value="${p.id}">${escapeHtml(personLabel(p))}</option>`).join("");
+
+  // Remember prior selections so a re-render (e.g. from clicking a tree node)
+  // doesn't silently overwrite a choice the user already made in the form.
+  const prevRelationTo = relationToSelect.value;
+  const prevParent1 = parent1Select.value;
+  const prevParent2 = parent2Select.value;
+
   relationToSelect.innerHTML = optionsHtml;
   parent1Select.innerHTML = optionsHtml;
   parent2Select.innerHTML = `<option value="">— none —</option>${optionsHtml}`;
 
-  if (selectedId && getPerson(selectedId)) {
-    relationToSelect.value = selectedId;
-    parent1Select.value = selectedId;
-  }
+  relationToSelect.value = getPerson(prevRelationTo) ? prevRelationTo : (selectedId || "");
+  parent1Select.value = getPerson(prevParent1) ? prevParent1 : (selectedId || "");
+  parent2Select.value = getPerson(prevParent2) ? prevParent2 : "";
 }
 
 function escapeHtml(str) {
@@ -197,6 +203,24 @@ function escapeHtml(str) {
   div.textContent = str ?? "";
   return div.innerHTML;
 }
+
+// Disambiguates people who share the same name, so dropdowns never show
+// two identical-looking options for different people.
+function personLabel(p) {
+  const sameName = people.filter((o) => o.name === p.name);
+  if (sameName.length < 2) return p.name;
+
+  const spouse = getSpouse(p);
+  if (spouse) return `${p.name} (spouse of ${spouse.name})`;
+
+  if (p.parentIds.length) {
+    const parentNames = p.parentIds.map((id) => getPerson(id)?.name).filter(Boolean);
+    if (parentNames.length) return `${p.name} (child of ${parentNames.join(" & ")})`;
+  }
+
+  return `${p.name} (#${p.id.slice(0, 4)})`;
+}
+
 
 // ---------- Form ----------
 function updateFormVisibility() {
@@ -217,7 +241,11 @@ function updateFormVisibility() {
     ? "The new member is added as a spouse, shown at the same level as the selected person."
     : rel === "Child"
       ? "Pick one or both parents — the new member is added as their child."
-      : "New members are attached as a child node under the selected \"Relation to\" person.";
+      : rel === "Parent"
+        ? "The new member becomes a parent of the selected person (up to 2 parents total)."
+        : rel === "Sibling"
+          ? "The new member is added as a sibling, sharing the selected person's parents (same level)."
+          : "New members are attached as a child node under the selected \"Relation to\" person.";
 }
 
 relationshipSelect.addEventListener("change", updateFormVisibility);
@@ -251,6 +279,25 @@ addForm.addEventListener("submit", async (e) => {
         return;
       }
       newPerson = { id: generateId(), name, relationship: "Child", spouseId: null, parentIds };
+    } else if (relationship === "Parent") {
+      const child = getPerson(relationToSelect.value);
+      if (!child) {
+        setStatus("Select whose parent this is.", true);
+        return;
+      }
+      if (child.parentIds.length >= 2) {
+        setStatus(`${child.name} already has 2 parents recorded.`, true);
+        return;
+      }
+      newPerson = { id: generateId(), name, relationship: "Parent", spouseId: null, parentIds: [] };
+      child.parentIds = [...child.parentIds, newPerson.id];
+    } else if (relationship === "Sibling") {
+      const sibling = getPerson(relationToSelect.value);
+      if (!sibling) {
+        setStatus("Select whose sibling this is.", true);
+        return;
+      }
+      newPerson = { id: generateId(), name, relationship: "Sibling", spouseId: null, parentIds: [...sibling.parentIds] };
     } else {
       const relTo = relationToSelect.value;
       if (!relTo) {
