@@ -17,7 +17,14 @@
     "id": "b2da9ffd-e374-4c95-a248-d70ff74957b4",
     "name": "Periyasamy",
     "relationship": "Sibling",
-    "spouseId": null,
+    "spouseId": "7cc36696-b81d-4f9c-b02b-0eae44dc2b5e",
+    "parentIds": []
+  },
+  {
+    "id": "7cc36696-b81d-4f9c-b02b-0eae44dc2b5e",
+    "name": "Raasamal",
+    "relationship": "Spouse",
+    "spouseId": "b2da9ffd-e374-4c95-a248-d70ff74957b4",
     "parentIds": []
   }
 ]
