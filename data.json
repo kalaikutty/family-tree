@@ -1,6 +1,9 @@
-{
-  "id": "root",
-  "name": "Periyasamy",
-  "relationship": "Root",
-  "children": []
-}
+[
+  {
+    "id": "10224249-5c26-40ab-8a94-4579ff46a4cd",
+    "name": "Alice",
+    "relationship": "",
+    "spouseId": null,
+    "parentIds": []
+  }
+]
