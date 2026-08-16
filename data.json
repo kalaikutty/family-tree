@@ -3,7 +3,14 @@
     "id": "6ca06e3c-6f41-4579-a82a-ba020a0d3431",
     "name": "Periyasamy",
     "relationship": "",
-    "spouseId": null,
+    "spouseId": "7baa5a94-abda-47fe-bb00-c7163a8eff38",
+    "parentIds": []
+  },
+  {
+    "id": "7baa5a94-abda-47fe-bb00-c7163a8eff38",
+    "name": "Karupaaye",
+    "relationship": "Spouse",
+    "spouseId": "6ca06e3c-6f41-4579-a82a-ba020a0d3431",
     "parentIds": []
   }
 ]
