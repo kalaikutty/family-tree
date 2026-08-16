@@ -1,0 +1,186 @@
+:root {
+  --primary: #2f6f4f;
+  --primary-dark: #1f4d36;
+  --bg: #f6f8f5;
+  --card: #ffffff;
+  --border: #d9e2dc;
+  --text: #1e2a24;
+  --muted: #6b7a72;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  background: var(--primary);
+  color: #fff;
+}
+
+.app-header h1 { margin: 0; font-size: 1.4rem; }
+
+.header-actions { display: flex; align-items: center; gap: 12px; }
+
+.status { font-size: 0.85rem; min-height: 1em; }
+
+main {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+  padding: 20px;
+  align-items: start;
+}
+
+@media (max-width: 800px) {
+  main { grid-template-columns: 1fr; }
+}
+
+.tree-panel, .form-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+}
+
+.tree-container {
+  overflow-x: auto;
+  padding: 20px 0;
+}
+
+.empty-msg { color: var(--muted); }
+
+/* ---- CSS tree diagram ---- */
+.tree, .tree ul {
+  list-style: none;
+  margin: 0;
+  padding-top: 20px;
+  position: relative;
+  display: flex;
+}
+
+.tree ul {
+  padding-top: 20px;
+}
+
+.tree li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  padding: 20px 8px 0 8px;
+}
+
+/* connector lines */
+.tree li::before, .tree li::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 50%;
+  border-top: 2px solid var(--border);
+  width: 50%;
+  height: 20px;
+}
+.tree li::after {
+  right: auto;
+  left: 50%;
+  border-left: 2px solid var(--border);
+}
+.tree li:only-child::before, .tree li:only-child::after { display: none; }
+.tree li:only-child { padding-top: 0; }
+.tree li:first-child::before { border: 0 none; }
+.tree li:last-child::after { border: 0 none; }
+.tree li:last-child::before {
+  border-right: 2px solid var(--border);
+  border-radius: 0 5px 0 0;
+}
+.tree li:first-child::after {
+  border-radius: 5px 0 0 0;
+}
+.tree > li { padding-top: 0; }
+.tree > li::before, .tree > li::after { display: none; }
+
+.tree li > .node-box::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  border-left: 2px solid var(--border);
+  width: 0;
+  height: 20px;
+}
+.tree > li > .node-box::before { display: none; }
+
+.node-box {
+  position: relative;
+  display: inline-block;
+  background: #fff;
+  border: 2px solid var(--primary);
+  border-radius: 8px;
+  padding: 8px 12px;
+  min-width: 120px;
+  cursor: pointer;
+  transition: box-shadow .15s ease;
+}
+.node-box:hover { box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+.node-box.selected { border-color: #d97706; background: #fff7ed; }
+
+.node-name { font-weight: 600; font-size: 0.95rem; }
+.node-rel { font-size: 0.75rem; color: var(--muted); }
+
+/* ---- form ---- */
+.form-panel h2 { margin-top: 0; font-size: 1.1rem; }
+.form-panel label { display: block; margin: 10px 0 4px; font-size: 0.85rem; font-weight: 600; }
+.form-panel input, .form-panel select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+.hint { font-size: 0.8rem; color: var(--muted); margin-top: 10px; }
+.hidden { display: none; }
+
+.btn {
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.btn-primary { background: var(--primary); color: #fff; margin-top: 14px; width: 100%; }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-secondary { background: #eef1ee; color: var(--text); }
+.btn-secondary:hover { background: #e0e6e0; }
+
+/* ---- modal ---- */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+.modal.hidden { display: none; }
+.modal-content {
+  background: #fff;
+  border-radius: 10px;
+  padding: 22px;
+  width: 420px;
+  max-width: 92vw;
+}
+.modal-content h2 { margin-top: 0; }
+.modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+.modal-actions .btn { flex: 1; }

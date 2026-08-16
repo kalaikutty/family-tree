@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Family Tree</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>🌳 Family Tree</h1>
+    <div class="header-actions">
+      <span id="status" class="status"></span>
+      <button id="settingsBtn" class="btn btn-secondary">⚙ Settings</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="tree-panel">
+      <div id="treeContainer" class="tree-container">
+        <p class="empty-msg">Loading family tree…</p>
+      </div>
+    </section>
+
+    <section class="form-panel">
+      <h2>Add Family Member</h2>
+      <form id="addForm">
+        <label for="name">Name</label>
+        <input type="text" id="name" required placeholder="e.g. Jane Doe" />
+
+        <label for="relationship">Relationship type</label>
+        <select id="relationship">
+          <option>Parent</option>
+          <option>Child</option>
+          <option>Spouse</option>
+          <option>Sibling</option>
+          <option>Grandparent</option>
+          <option>Grandchild</option>
+          <option value="Other">Other (custom)</option>
+        </select>
+
+        <div id="customRelWrap" class="hidden">
+          <label for="customRel">Custom relationship label</label>
+          <input type="text" id="customRel" placeholder="e.g. Cousin" />
+        </div>
+
+        <label for="relationTo">Relation to (existing member)</label>
+        <select id="relationTo" required></select>
+
+        <button type="submit" class="btn btn-primary">➕ Add Member</button>
+      </form>
+      <p class="hint">
+        New members are attached as a child node under the selected "Relation to" person.
+      </p>
+    </section>
+  </main>
+
+  <!-- Settings modal -->
+  <div id="settingsModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>GitHub Storage Settings</h2>
+      <p class="hint">
+        To persist changes back to GitHub, provide a repo and a
+        <strong>fine-grained personal access token</strong> scoped to this repo only
+        (Contents: Read and write). The token is stored only in your browser's
+        local storage and sent directly to the GitHub API over HTTPS — never
+        shared elsewhere. Leave the token blank to keep changes local-only
+        (saved in this browser via local storage).
+      </p>
+      <label for="ghOwner">Owner (username or org)</label>
+      <input type="text" id="ghOwner" placeholder="e.g. octocat" />
+
+      <label for="ghRepo">Repository name</label>
+      <input type="text" id="ghRepo" placeholder="e.g. family-tree" />
+
+      <label for="ghBranch">Branch</label>
+      <input type="text" id="ghBranch" placeholder="main" value="main" />
+
+      <label for="ghToken">Personal Access Token</label>
+      <input type="password" id="ghToken" placeholder="github_pat_..." />
+
+      <div class="modal-actions">
+        <button id="settingsSave" class="btn btn-primary">Save</button>
+        <button id="settingsCancel" class="btn btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
