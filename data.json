@@ -3,7 +3,14 @@
     "id": "10224249-5c26-40ab-8a94-4579ff46a4cd",
     "name": "Alice",
     "relationship": "",
-    "spouseId": null,
+    "spouseId": "626197fc-5d44-43eb-96a6-721f7283f3e4",
+    "parentIds": []
+  },
+  {
+    "id": "626197fc-5d44-43eb-96a6-721f7283f3e4",
+    "name": "Bob",
+    "relationship": "Spouse",
+    "spouseId": "10224249-5c26-40ab-8a94-4579ff46a4cd",
     "parentIds": []
   }
 ]
