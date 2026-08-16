@@ -109,7 +109,7 @@ main {
 .tree > li { padding-top: 0; }
 .tree > li::before, .tree > li::after { display: none; }
 
-.tree li > .node-box::before {
+.tree li > .node-unit::before {
   content: '';
   position: absolute;
   top: -20px;
@@ -118,7 +118,19 @@ main {
   width: 0;
   height: 20px;
 }
-.tree > li > .node-box::before { display: none; }
+.tree > li > .node-unit::before { display: none; }
+
+.node-unit {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.spouse-connector {
+  font-size: 1rem;
+  color: var(--muted);
+}
 
 .node-box {
   position: relative;

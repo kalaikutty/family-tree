@@ -27,30 +27,40 @@
         <label for="name">Name</label>
         <input type="text" id="name" required placeholder="e.g. Jane Doe" />
 
-        <label for="relationship">Relationship type</label>
-        <select id="relationship">
-          <option>Parent</option>
-          <option>Child</option>
-          <option>Spouse</option>
-          <option>Sibling</option>
-          <option>Grandparent</option>
-          <option>Grandchild</option>
-          <option value="Other">Other (custom)</option>
-        </select>
+        <div id="relationFields" class="hidden">
+          <label for="relationship">Relationship type</label>
+          <select id="relationship">
+            <option>Parent</option>
+            <option>Child</option>
+            <option>Spouse</option>
+            <option>Sibling</option>
+            <option>Grandparent</option>
+            <option>Grandchild</option>
+            <option value="Other">Other (custom)</option>
+          </select>
 
-        <div id="customRelWrap" class="hidden">
-          <label for="customRel">Custom relationship label</label>
-          <input type="text" id="customRel" placeholder="e.g. Cousin" />
+          <div id="customRelWrap" class="hidden">
+            <label for="customRel">Custom relationship label</label>
+            <input type="text" id="customRel" placeholder="e.g. Cousin" />
+          </div>
+
+          <div id="singleRelationWrap">
+            <label for="relationTo">Relation to (existing member)</label>
+            <select id="relationTo"></select>
+          </div>
+
+          <div id="parentsWrap" class="hidden">
+            <label for="parent1">Parent 1</label>
+            <select id="parent1"></select>
+
+            <label for="parent2">Parent 2 (optional)</label>
+            <select id="parent2"></select>
+          </div>
         </div>
-
-        <label for="relationTo">Relation to (existing member)</label>
-        <select id="relationTo" required></select>
 
         <button type="submit" class="btn btn-primary">➕ Add Member</button>
       </form>
-      <p class="hint">
-        New members are attached as a child node under the selected "Relation to" person.
-      </p>
+      <p id="formHint" class="hint"></p>
     </section>
   </main>
 
