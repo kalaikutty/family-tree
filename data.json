@@ -12,5 +12,15 @@
     "relationship": "Spouse",
     "spouseId": "10224249-5c26-40ab-8a94-4579ff46a4cd",
     "parentIds": []
+  },
+  {
+    "id": "fc743442-a429-43a8-afe6-eeb1d302461b",
+    "name": "Charlie",
+    "relationship": "Child",
+    "spouseId": null,
+    "parentIds": [
+      "10224249-5c26-40ab-8a94-4579ff46a4cd",
+      "626197fc-5d44-43eb-96a6-721f7283f3e4"
+    ]
   }
 ]
