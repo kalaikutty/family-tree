@@ -7,13 +7,6 @@
     "parentIds": []
   },
   {
-    "id": "cf2ee2af-a3f5-44e1-9f02-fbdb010ab117",
-    "name": "Raasamal",
-    "relationship": "Spouse",
-    "spouseId": null,
-    "parentIds": []
-  },
-  {
     "id": "5eff89f9-2985-4a11-a17e-e78c8bd079d7",
     "name": "Karupaayee",
     "relationship": "Spouse",
@@ -26,8 +19,7 @@
     "relationship": "Child",
     "spouseId": null,
     "parentIds": [
-      "5eff89f9-2985-4a11-a17e-e78c8bd079d7",
-      "cf2ee2af-a3f5-44e1-9f02-fbdb010ab117"
+      "5eff89f9-2985-4a11-a17e-e78c8bd079d7"
     ]
   }
 ]
