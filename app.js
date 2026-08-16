@@ -64,6 +64,23 @@ function findNode(node, id) {
   return null;
 }
 
+function findParent(node, childId) {
+  for (const child of node.children || []) {
+    if (child.id === childId) return node;
+    const found = findParent(child, childId);
+    if (found) return found;
+  }
+  return null;
+}
+
+function countDescendants(node) {
+  let count = 0;
+  for (const child of node.children || []) {
+    count += 1 + countDescendants(child);
+  }
+  return count;
+}
+
 function flattenNodes(node, out = []) {
   out.push(node);
   for (const child of node.children || []) flattenNodes(child, out);
@@ -102,12 +119,48 @@ function renderNode(node) {
   });
   li.appendChild(box);
 
+  if (node.id !== treeData.id) {
+    const deleteBtn = document.createElement("button");
+    deleteBtn.type = "button";
+    deleteBtn.className = "delete-btn";
+    deleteBtn.title = `Delete ${node.name}`;
+    deleteBtn.textContent = "🗑";
+    deleteBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      deleteNode(node.id);
+    });
+    box.appendChild(deleteBtn);
+  }
+
   if (node.children && node.children.length) {
     const ul = document.createElement("ul");
     node.children.forEach((child) => ul.appendChild(renderNode(child)));
     li.appendChild(ul);
   }
   return li;
+}
+
+async function deleteNode(id) {
+  const node = findNode(treeData, id);
+  if (!node) return;
+  const descendants = countDescendants(node);
+  const warning = descendants > 0
+    ? `Delete "${node.name}" and their ${descendants} descendant${descendants > 1 ? "s" : ""}?`
+    : `Delete "${node.name}"?`;
+  if (!window.confirm(warning)) return;
+
+  const parent = findParent(treeData, id);
+  if (!parent) return; // root can't be deleted
+  parent.children = parent.children.filter((c) => c.id !== id);
+
+  if (selectedId === id || !findNode(treeData, selectedId)) {
+    selectedId = treeData.id;
+  }
+
+  localStorage.setItem(LS_KEY_TREE, JSON.stringify(treeData));
+  renderTree();
+  populateRelationToOptions();
+  await saveToGitHub();
 }
 
 function populateRelationToOptions() {
