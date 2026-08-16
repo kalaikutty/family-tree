@@ -53,9 +53,14 @@ function commitAndPush(cb) {
     execFile("git", ["commit", "-m", "Update family tree"], { cwd: ROOT }, (err2, stdout, stderr) => {
       const nothingToCommit = /nothing to commit/i.test(stdout + stderr);
       if (err2 && !nothingToCommit) return cb(err2);
-      execFile("git", ["push"], { cwd: ROOT }, (err3) => {
-        if (err3) return cb(err3);
-        cb(null);
+      // Reconcile with any remote commits (e.g. edits from another session)
+      // before pushing, instead of failing outright on divergence.
+      execFile("git", ["pull", "--rebase", "--autostash"], { cwd: ROOT }, (errPull, pullOut, pullErr) => {
+        if (errPull) return cb(new Error("git pull --rebase failed: " + (pullErr || pullOut || errPull.message)));
+        execFile("git", ["push"], { cwd: ROOT }, (err3, pushOut, pushErr) => {
+          if (err3) return cb(new Error("git push failed: " + (pushErr || pushOut || err3.message)));
+          cb(null);
+        });
       });
     });
   });
@@ -77,7 +82,11 @@ function serveStatic(req, res) {
       return res.end("Not found");
     }
     const ext = path.extname(fullPath);
-    res.writeHead(200, { "Content-Type": MIME_TYPES[ext] || "application/octet-stream" });
+    res.writeHead(200, {
+      "Content-Type": MIME_TYPES[ext] || "application/octet-stream",
+      // Always revalidate so a fixed app.js/style.css is picked up immediately.
+      "Cache-Control": "no-cache",
+    });
     res.end(content);
   });
 }
