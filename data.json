@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "id": "e3234935-fb30-4437-94b3-98e37a4f49c9",
+    "name": "TestPerson",
+    "relationship": "",
+    "spouseId": null,
+    "parentIds": []
+  }
+]
