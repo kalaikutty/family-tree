@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "id": "5d11a7fe-4ea0-489d-b93e-ac5dd07ac5e5",
+    "name": "Periyasamy",
+    "relationship": "",
+    "spouseId": "cf2ee2af-a3f5-44e1-9f02-fbdb010ab117",
+    "parentIds": []
+  },
+  {
+    "id": "cf2ee2af-a3f5-44e1-9f02-fbdb010ab117",
+    "name": "Raasamal",
+    "relationship": "Spouse",
+    "spouseId": "5d11a7fe-4ea0-489d-b93e-ac5dd07ac5e5",
+    "parentIds": []
+  }
+]
