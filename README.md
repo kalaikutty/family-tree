@@ -14,10 +14,10 @@ Pages just serves the static files (`index.html`, `style.css`, `app.js`,
 `data.json`) — no server runs there, so it always shows whatever was last
 pushed to `main`.
 
-## Editing (local only, no tokens)
+## Editing locally (recommended, one-time setup)
 
-Persistent edits (add/delete a member) only work when you run the small
-local Node server on your own machine:
+Persistent edits (add/delete a member) work when you run the small local
+Node server on your own machine:
 
 ```powershell
 node server.js
@@ -25,17 +25,33 @@ node server.js
 
 Then open http://localhost:3000
 
-- **No tokens, no Settings screen.** When you add or delete a member, the
-  browser posts the updated tree to the local server, which writes
-  `data.json` to disk and runs `git add` / `git commit` / `git push` for you,
-  using this machine's own git/`gh` credentials (already signed in) — nothing
-  is typed or stored in the browser.
-- Because it commits straight to GitHub, run it on a machine that has your
-  `git`/`gh` login (the one used to create this repo).
-- Every add/delete auto-commits and pushes `data.json`; GitHub Pages picks up
-  the change (usually within a minute) so the public link stays in sync.
-- If you open the public link directly (not via `node server.js`), the
-  Add/Delete buttons still update the tree in your browser for that session,
-  but since there's no server there to receive the save, changes won't
-  persist or push to GitHub — only edits made through your local server do.
+By default it saves via `git add`/`commit`/`push` using this machine's own
+git/`gh` credentials. For a faster, more reliable save that doesn't depend on
+local git state, set up a token once instead:
+
+1. Copy `.env.example` to `.env` (this file is git-ignored, never committed).
+2. Create a fine-grained GitHub PAT (Settings → Developer settings → Personal
+   access tokens) scoped to only this repo, with **Contents: Read and write**.
+3. Paste it into `.env` as `GITHUB_TOKEN=...` and save.
+4. Restart `node server.js` — it prints which save method it's using.
+
+With `.env` set, saves go straight to the GitHub API — no git required, and
+you never have to enter the token again on that machine.
+
+## Editing from the public page
+
+The public page has no server, so it can't use `.env`. Instead, click
+**🔑 GitHub Token** (shown only there) and paste the same kind of
+fine-grained PAT once — it's saved in that browser's local storage and used
+directly for `api.github.com` calls, never sent anywhere else. You'll need to
+repeat this once per browser/device.
+
+## Notes
+
+- Every save auto-commits/pushes `data.json`; GitHub Pages picks up the
+  change (usually within a minute) so the public link stays in sync.
+- Adding a **Child** requires selecting two different existing people as
+  Parent 1 and Parent 2 — this prevents mismatched/incomplete parent links.
+- Assigning someone a new **Spouse** automatically clears their previous
+  spouse's link, so re-marriages never leave a stale, one-sided reference.
 

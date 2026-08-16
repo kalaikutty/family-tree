@@ -214,8 +214,8 @@ function populateRelationSelects() {
   const prevParent2 = parent2Select.value;
 
   relationToSelect.innerHTML = optionsHtml;
-  parent1Select.innerHTML = optionsHtml;
-  parent2Select.innerHTML = `<option value="">— none —</option>${optionsHtml}`;
+  parent1Select.innerHTML = `<option value="">— Select parent 1 —</option>${optionsHtml}`;
+  parent2Select.innerHTML = `<option value="">— Select parent 2 —</option>${optionsHtml}`;
 
   relationToSelect.value = getPerson(prevRelationTo) ? prevRelationTo : (selectedId || "");
   parent1Select.value = getPerson(prevParent1) ? prevParent1 : (selectedId || "");
@@ -252,19 +252,26 @@ function updateFormVisibility() {
   relationFields.classList.toggle("hidden", !hasPeople);
 
   if (!hasPeople) {
+    parent1Select.required = false;
+    parent2Select.required = false;
     formHint.textContent = "This is the first member — they'll start the tree with no relations yet.";
     return;
   }
 
   const rel = relationshipSelect.value;
+  const isChild = rel === "Child";
   customRelWrap.classList.toggle("hidden", rel !== "Other");
-  parentsWrap.classList.toggle("hidden", rel !== "Child");
-  singleRelationWrap.classList.toggle("hidden", rel === "Child");
+  parentsWrap.classList.toggle("hidden", !isChild);
+  singleRelationWrap.classList.toggle("hidden", isChild);
+  // Hidden required <select>s block form submission in some browsers, so
+  // only mark them required while they're actually visible.
+  parent1Select.required = isChild;
+  parent2Select.required = isChild;
 
   formHint.textContent = rel === "Spouse"
     ? "The new member is added as a spouse, shown at the same level as the selected person."
     : rel === "Child"
-      ? "Pick one or both parents — the new member is added as their child."
+      ? "Both parents are required — the new member is added as their child."
       : rel === "Parent"
         ? "The new member becomes a parent of the selected person (up to 2 parents total)."
         : rel === "Sibling"
@@ -294,15 +301,26 @@ addForm.addEventListener("submit", async (e) => {
         setStatus("Select who this is a spouse of.", true);
         return;
       }
+      // Clear any existing spouse link on both sides first, so re-marrying
+      // someone never leaves a stale/asymmetric spouseId behind.
+      if (spouseOf.spouseId) {
+        const oldSpouse = getPerson(spouseOf.spouseId);
+        if (oldSpouse) oldSpouse.spouseId = null;
+      }
       newPerson = { id: generateId(), name, relationship: "Spouse", spouseId: spouseOf.id, parentIds: [] };
       spouseOf.spouseId = newPerson.id;
     } else if (relationship === "Child") {
-      const parentIds = [parent1Select.value, parent2Select.value].filter(Boolean);
-      if (!parentIds.length) {
-        setStatus("Select at least one parent.", true);
+      const p1 = parent1Select.value;
+      const p2 = parent2Select.value;
+      if (!p1 || !p2) {
+        setStatus("Select both parents.", true);
         return;
       }
-      newPerson = { id: generateId(), name, relationship: "Child", spouseId: null, parentIds };
+      if (p1 === p2) {
+        setStatus("Parent 1 and Parent 2 must be different people.", true);
+        return;
+      }
+      newPerson = { id: generateId(), name, relationship: "Child", spouseId: null, parentIds: [p1, p2] };
     } else if (relationship === "Parent") {
       const child = getPerson(relationToSelect.value);
       if (!child) {
@@ -407,8 +425,12 @@ async function saveViaGitHubApi() {
 
   if (!putRes.ok) {
     const errJson = await putRes.json().catch(() => ({}));
-    if (putRes.status === 401) localStorage.removeItem(LS_KEY_TOKEN);
-    throw new Error(errJson.message || `HTTP ${putRes.status}`);
+    const reason = errJson.message || `HTTP ${putRes.status}`;
+    if (putRes.status === 401) {
+      localStorage.removeItem(LS_KEY_TOKEN);
+      throw new Error(`Token rejected (${reason}) — removed, please save a valid one via \uD83D\uDD11 GitHub Token`);
+    }
+    throw new Error(reason);
   }
 }
 
