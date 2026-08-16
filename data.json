@@ -2,12 +2,5 @@
   "id": "root",
   "name": "Kaalidhash",
   "relationship": "Root",
-  "children": [
-    {
-      "id": "test-1",
-      "name": "Test Person",
-      "relationship": "Child",
-      "children": []
-    }
-  ]
+  "children": []
 }

@@ -11,7 +11,6 @@
     <h1>🌳 Family Tree</h1>
     <div class="header-actions">
       <span id="status" class="status"></span>
-      <button id="settingsBtn" class="btn btn-secondary">⚙ Settings</button>
     </div>
   </header>
 
@@ -54,37 +53,6 @@
       </p>
     </section>
   </main>
-
-  <!-- Settings modal -->
-  <div id="settingsModal" class="modal hidden">
-    <div class="modal-content">
-      <h2>GitHub Storage Settings</h2>
-      <p class="hint">
-        To persist changes back to GitHub, provide a repo and a
-        <strong>fine-grained personal access token</strong> scoped to this repo only
-        (Contents: Read and write). The token is stored only in your browser's
-        local storage and sent directly to the GitHub API over HTTPS — never
-        shared elsewhere. Leave the token blank to keep changes local-only
-        (saved in this browser via local storage).
-      </p>
-      <label for="ghOwner">Owner (username or org)</label>
-      <input type="text" id="ghOwner" placeholder="e.g. octocat" />
-
-      <label for="ghRepo">Repository name</label>
-      <input type="text" id="ghRepo" placeholder="e.g. family-tree" />
-
-      <label for="ghBranch">Branch</label>
-      <input type="text" id="ghBranch" placeholder="main" value="main" />
-
-      <label for="ghToken">Personal Access Token</label>
-      <input type="password" id="ghToken" placeholder="github_pat_..." />
-
-      <div class="modal-actions">
-        <button id="settingsSave" class="btn btn-primary">Save</button>
-        <button id="settingsCancel" class="btn btn-secondary">Cancel</button>
-      </div>
-    </div>
-  </div>
 
   <script src="app.js"></script>
 </body>

@@ -4,7 +4,6 @@ let selectedId = "root";
 
 const DATA_FILE = "data.json";
 const LS_KEY_TREE = "familyTree.cachedData";
-const LS_KEY_SETTINGS = "familyTree.githubSettings";
 
 // ---------- Elements ----------
 const treeContainer = document.getElementById("treeContainer");
@@ -16,15 +15,6 @@ const customRelWrap = document.getElementById("customRelWrap");
 const customRelInput = document.getElementById("customRel");
 const relationToSelect = document.getElementById("relationTo");
 
-const settingsBtn = document.getElementById("settingsBtn");
-const settingsModal = document.getElementById("settingsModal");
-const settingsSave = document.getElementById("settingsSave");
-const settingsCancel = document.getElementById("settingsCancel");
-const ghOwner = document.getElementById("ghOwner");
-const ghRepo = document.getElementById("ghRepo");
-const ghBranch = document.getElementById("ghBranch");
-const ghToken = document.getElementById("ghToken");
-
 // ---------- Init ----------
 init();
 
@@ -32,7 +22,6 @@ async function init() {
   await loadData();
   renderTree();
   populateRelationToOptions();
-  loadSettingsIntoForm();
 }
 
 // ---------- Data loading ----------
@@ -160,7 +149,7 @@ async function deleteNode(id) {
   localStorage.setItem(LS_KEY_TREE, JSON.stringify(treeData));
   renderTree();
   populateRelationToOptions();
-  await saveToGitHub();
+  await saveTree();
 }
 
 function populateRelationToOptions() {
@@ -213,100 +202,27 @@ addForm.addEventListener("submit", async (e) => {
   addForm.reset();
   customRelWrap.classList.add("hidden");
 
-  await saveToGitHub();
+  await saveTree();
 });
 
-// ---------- Settings ----------
-function getSettings() {
+// ---------- Persistence (via local server, no tokens needed) ----------
+async function saveTree() {
+  setStatus("Saving…", false);
   try {
-    return JSON.parse(localStorage.getItem(LS_KEY_SETTINGS)) || {};
-  } catch {
-    return {};
-  }
-}
-
-function loadSettingsIntoForm() {
-  const s = getSettings();
-  ghOwner.value = s.owner || "";
-  ghRepo.value = s.repo || "";
-  ghBranch.value = s.branch || "main";
-  ghToken.value = "";
-}
-
-settingsBtn.addEventListener("click", () => {
-  loadSettingsIntoForm();
-  settingsModal.classList.remove("hidden");
-});
-settingsCancel.addEventListener("click", () => settingsModal.classList.add("hidden"));
-
-settingsSave.addEventListener("click", () => {
-  const existing = getSettings();
-  const settings = {
-    owner: ghOwner.value.trim(),
-    repo: ghRepo.value.trim(),
-    branch: ghBranch.value.trim() || "main",
-    // keep previously saved token if the field was left blank
-    token: ghToken.value.trim() || existing.token || "",
-  };
-  localStorage.setItem(LS_KEY_SETTINGS, JSON.stringify(settings));
-  settingsModal.classList.add("hidden");
-  setStatus("Settings saved.", false);
-});
-
-// ---------- GitHub persistence ----------
-async function saveToGitHub() {
-  const { owner, repo, branch, token } = getSettings();
-
-  if (!owner || !repo || !token) {
-    setStatus("Saved locally in this browser only. Configure GitHub settings (⚙) to persist to the repo.", false);
-    return;
-  }
-
-  setStatus("Saving to GitHub…", false);
-  try {
-    const apiBase = `https://api.github.com/repos/${owner}/${repo}/contents/${DATA_FILE}`;
-    const headers = {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/vnd.github+json",
-    };
-
-    // 1. Get current file SHA (needed to update an existing file)
-    let sha;
-    const getRes = await fetch(`${apiBase}?ref=${encodeURIComponent(branch)}`, { headers });
-    if (getRes.ok) {
-      const getJson = await getRes.json();
-      sha = getJson.sha;
-    } else if (getRes.status !== 404) {
-      throw new Error(`Failed to read current file (HTTP ${getRes.status})`);
-    }
-
-    // 2. Put updated content
-    const content = b64EncodeUnicode(JSON.stringify(treeData, null, 2));
-    const putRes = await fetch(apiBase, {
-      method: "PUT",
-      headers: { ...headers, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        message: `Add family member: ${treeData ? "" : ""}update tree`,
-        content,
-        branch,
-        ...(sha ? { sha } : {}),
-      }),
+    const res = await fetch("/api/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(treeData, null, 2),
     });
-
-    if (!putRes.ok) {
-      const errJson = await putRes.json().catch(() => ({}));
-      throw new Error(errJson.message || `HTTP ${putRes.status}`);
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || !json.ok) {
+      throw new Error(json.error || `HTTP ${res.status}`);
     }
-
-    setStatus("Saved to GitHub ✓", false);
+    setStatus("Saved ✓", false);
   } catch (err) {
     console.error(err);
-    setStatus(`GitHub save failed: ${err.message}`, true);
+    setStatus(`Save failed: ${err.message} (kept locally in this browser only)`, true);
   }
-}
-
-function b64EncodeUnicode(str) {
-  return btoa(unescape(encodeURIComponent(str)));
 }
 
 function setStatus(msg, isError) {
